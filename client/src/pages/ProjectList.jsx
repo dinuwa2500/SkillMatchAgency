@@ -12,6 +12,7 @@ import {
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
+import * as XLSX from 'xlsx'; // Import SheetJS
 import Swal from 'sweetalert2';
 import Toast from '../utils/toast';
 
@@ -87,15 +88,15 @@ const ProjectList = () => {
 
     // Derived Data: Chart Data
     const chartData = useMemo(() => {
-        return filteredProjects.map(p => ({
-            name: p.name,
-            requirements: p.requirements ? p.requirements.length : 0,
-            // Mocking 'assigned' count as we don't have a direct table for it yet, 
-            // but we can assume 'Active' projects might have some personnel logic later.
-            // For now, let's visualize Requirements count vs a static capacity or just Requirements.
-            // Or better, let's just show Requirements Distribution.
-            personnel_needed: p.requirements ? p.requirements.length : 0
-        })).slice(0, 10); // Top 10 for chart clarity
+        return filteredProjects
+            .filter(p => p.status === 'Active' || p.status === 'Planning') // Optional: Focus on relevant projects
+            .map(p => ({
+                name: p.name,
+                requirements: p.requirements ? p.requirements.length : 0,
+                // Add a color property if we wanted per-bar static logic, but we'll do it in render
+            }))
+            .sort((a, b) => b.requirements - a.requirements) // Show busiest projects first
+            .slice(0, 8); // Limit to top 8 for space
     }, [filteredProjects]);
 
     // Handlers
@@ -184,24 +185,65 @@ const ProjectList = () => {
     };
 
     const exportData = () => {
-        const headers = ['Name', 'Description', 'Status', 'Start Date', 'End Date'];
-        const csvContent = [
-            headers.join(','),
-            ...filteredProjects.map(p => [
-                `"${p.name}"`,
-                `"${p.description || ''}"`,
-                p.status,
-                p.start_date?.split('T')[0],
-                p.end_date?.split('T')[0]
-            ].join(','))
-        ].join('\n');
+        // Helper to safely escape CSV fields
+        const escapeCsvCell = (data) => {
+            if (data === null || data === undefined) return '';
+            const str = String(data);
+            // If data contains commas, quotes, or newlines, wrap in quotes and escape internal quotes
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
 
-        const blob = new Blob([csvContent], { type: 'text/csv' });
+        // Define Headers
+        const headers = [
+            'Project Name',
+            'Description',
+            'Status',
+            'Start Date',
+            'End Date',
+            'Required Skills (Level)',
+            'Skill Count'
+        ];
+
+        // Format Rows
+        const rows = filteredProjects.map(p => {
+            // Format Requirements: "Java (Expert); Python (Intermediate)"
+            const reqsString = p.requirements
+                ? p.requirements.map(r => {
+                    // Find skill name from skills list if available, otherwise just ID (though backend usually populates name)
+                    // Assuming requirements might need name lookup if not populated, but verify with data. 
+                    // If p.requirements has joined names, great. If not, we might need to lookup in 'skills' state.
+                    // Based on previous code, requirements seem to be objects. Let's assume we need to lookup or it's already there.
+                    // Safe fallback:
+                    const skillName = skills.find(s => s.id === r.skill_id)?.name || 'Unknown Skill';
+                    return `${skillName} (${r.min_proficiency_level})`;
+                }).join('; ')
+                : '';
+
+            return [
+                escapeCsvCell(p.name),
+                escapeCsvCell(p.description),
+                escapeCsvCell(p.status),
+                escapeCsvCell(p.start_date ? p.start_date.split('T')[0] : ''),
+                escapeCsvCell(p.end_date ? p.end_date.split('T')[0] : ''),
+                escapeCsvCell(reqsString),
+                escapeCsvCell(p.requirements ? p.requirements.length : 0)
+            ].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        // Trigger Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'projects_export.csv';
-        a.click();
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `projects_export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const fetchProjects = async () => {
@@ -330,17 +372,28 @@ const ProjectList = () => {
 
             {/* Utilization Chart */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">Project Load Overview</h3>
-                <div className="h-64 w-full">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Project Requirements Overview</h3>
+                    <span className="text-xs text-gray-400">Top 8 Projects by Needs</span>
+                </div>
+                <div className="h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-45} textAnchor="end" height={60} />
-                            <YAxis />
-                            <RechartsTooltip cursor={{ fill: 'transparent' }} />
-                            <Bar dataKey="name" fill="#6366f1" radius={[4, 4, 0, 0]} name="Skill Requirements" barSize={40}>
+                        <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                            <XAxis
+                                dataKey="name"
+                                tick={{ fontSize: 11, fill: '#6b7280' }}
+                                interval={0}
+                            />
+                            <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} allowDecimals={false} />
+                            <RechartsTooltip
+                                cursor={{ fill: '#f3f4f6' }}
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                            />
+                            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                            <Bar dataKey="requirements" name="Required Skills" radius={[4, 4, 0, 0]} barSize={50}>
                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#818cf8' : '#6366f1'} />
+                                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#818cf8'} />
                                 ))}
                             </Bar>
                         </BarChart>

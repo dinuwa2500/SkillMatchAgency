@@ -271,6 +271,32 @@ const ResourceScheduler = () => {
         };
     }, [selectedTask]); // Re-create when selection changes to update highlighting
 
+    // Custom Header to match the "Card" layout (removes the misleading "Name | From | To" columns)
+    const CustomTaskHeader = useMemo(() => {
+        return ({ headerHeight, fontFamily, fontSize }) => {
+            return (
+                <div
+                    style={{
+                        height: headerHeight,
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#6b7280',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        borderBottom: '1px solid #e5e7eb',
+                        backgroundColor: '#f9fafb',
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '16px'
+                    }}
+                >
+                    Resource Details
+                </div>
+            );
+        }
+    }, []);
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -326,7 +352,9 @@ const ResourceScheduler = () => {
                         onDelete={handleDelete}
                         onDoubleClick={handleDblClick}
                         onClick={handleSelect}
+                        onClick={handleSelect}
                         TaskListTable={CustomTaskList}
+                        TaskListHeader={CustomTaskHeader}
                         listCellWidth="350px" // Wider to fit the richer data grid
                         columnWidth={viewMode === ViewMode.Month ? 300 : 65}
                         barFill={60}
