@@ -4,6 +4,8 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import { Plus, Trash, Edit, Award, Search, Filter, X } from 'lucide-react';
+import Swal from 'sweetalert2';
+import Toast from '../utils/toast';
 
 const PersonnelList = () => {
     const [personnel, setPersonnel] = useState([]);
@@ -53,14 +55,17 @@ const PersonnelList = () => {
         try {
             if (currentPerson) {
                 await axios.put(`${API_URL}/personnel/${currentPerson.id}`, formData);
+                Toast.fire({ icon: 'success', title: 'Personnel updated successfully' });
             } else {
                 await axios.post(`${API_URL}/personnel`, formData);
+                Toast.fire({ icon: 'success', title: 'Personnel added successfully' });
             }
             setIsModalOpen(false);
             resetForm();
             fetchPersonnel();
         } catch (error) {
             console.error('Error saving personnel:', error);
+            Toast.fire({ icon: 'error', title: 'Failed to save personnel' });
         }
     };
 
@@ -72,18 +77,33 @@ const PersonnelList = () => {
             setIsSkillModalOpen(false);
             setSkillData({ skill_id: '', proficiency_level: 'Beginner' });
             fetchPersonnel(); // Refresh to see new skills
+            Toast.fire({ icon: 'success', title: 'Skill assigned successfully' });
         } catch (error) {
             console.error('Error assigning skill:', error);
+            Toast.fire({ icon: 'error', title: 'Failed to assign skill' });
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure?')) return;
-        try {
-            await axios.delete(`${API_URL}/personnel/${id}`);
-            fetchPersonnel();
-        } catch (error) {
-            console.error('Error deleting personnel:', error);
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${API_URL}/personnel/${id}`);
+                fetchPersonnel();
+                Toast.fire({ icon: 'success', title: 'Personnel removed' });
+            } catch (error) {
+                console.error('Error deleting personnel:', error);
+                Toast.fire({ icon: 'error', title: 'Failed to delete personnel' });
+            }
         }
     };
 

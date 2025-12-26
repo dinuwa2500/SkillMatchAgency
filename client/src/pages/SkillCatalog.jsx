@@ -4,6 +4,8 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import { Plus, Trash, Edit, Search, Filter, X } from 'lucide-react';
+import Swal from 'sweetalert2';
+import Toast from '../utils/toast';
 
 const SkillCatalog = () => {
     const [skills, setSkills] = useState([]);
@@ -99,39 +101,67 @@ const SkillCatalog = () => {
         try {
             if (currentSkill) {
                 await axios.put(`${API_URL}/skills/${currentSkill.id}`, formData);
+                Toast.fire({ icon: 'success', title: 'Skill updated successfully' });
             } else {
                 await axios.post(`${API_URL}/skills`, formData);
+                Toast.fire({ icon: 'success', title: 'Skill added successfully' });
             }
             setIsModalOpen(false);
             resetForm();
             fetchSkills();
         } catch (error) {
             console.error('Error saving skill:', error);
+            Toast.fire({ icon: 'error', title: 'Failed to save skill' });
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure?')) return;
-        try {
-            await axios.delete(`${API_URL}/skills/${id}`);
-            fetchSkills();
-        } catch (error) {
-            console.error('Error deleting skill:', error);
+        const result = await Swal.fire({
+            title: 'Delete this skill?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${API_URL}/skills/${id}`);
+                fetchSkills();
+                Toast.fire({ icon: 'success', title: 'Skill deleted' });
+            } catch (error) {
+                console.error('Error deleting skill:', error);
+                Toast.fire({ icon: 'error', title: 'Failed to delete skill' });
+            }
         }
     };
 
     const handleBulkDelete = async () => {
         if (selectedSkills.size === 0) return;
-        if (!window.confirm(`Are you sure you want to delete ${selectedSkills.size} skills?`)) return;
 
-        try {
-            // Execute all deletes in parallel
-            await Promise.all(Array.from(selectedSkills).map(id => axios.delete(`${API_URL}/skills/${id}`)));
-            setSelectedSkills(new Set()); // Clear selection
-            fetchSkills();
-        } catch (error) {
-            console.error('Error deleting skills:', error);
-            alert('Failed to delete some skills.');
+        const result = await Swal.fire({
+            title: `Delete ${selectedSkills.size} skills?`,
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete them!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                // Execute all deletes in parallel
+                await Promise.all(Array.from(selectedSkills).map(id => axios.delete(`${API_URL}/skills/${id}`)));
+                setSelectedSkills(new Set()); // Clear selection
+                fetchSkills();
+                Toast.fire({ icon: 'success', title: 'Selected skills deleted' });
+            } catch (error) {
+                console.error('Error deleting skills:', error);
+                Toast.fire({ icon: 'error', title: 'Failed to delete some skills' });
+            }
         }
     };
 

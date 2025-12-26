@@ -12,6 +12,8 @@ import {
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell
 } from 'recharts';
+import Swal from 'sweetalert2';
+import Toast from '../utils/toast';
 
 const ProjectList = () => {
     // Data State
@@ -116,14 +118,32 @@ const ProjectList = () => {
     };
 
     const handleBulkDelete = async () => {
-        if (!window.confirm(`Delete ${selectedProjects.size} projects?`)) return;
-        try {
-            await Promise.all(Array.from(selectedProjects).map(id => axios.delete(`${API_URL}/projects/${id}`)));
-            setSelectedProjects(new Set());
-            fetchProjects();
-        } catch (error) {
-            console.error('Bulk delete error:', error);
-            alert('Failed to delete some projects');
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete ${selectedProjects.size} projects. This action cannot be undone!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete them!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await Promise.all(Array.from(selectedProjects).map(id => axios.delete(`${API_URL}/projects/${id}`)));
+                setSelectedProjects(new Set());
+                fetchProjects();
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Selected projects deleted'
+                });
+            } catch (error) {
+                console.error('Bulk delete error:', error);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to delete some projects'
+                });
+            }
         }
     };
 
@@ -212,15 +232,26 @@ const ProjectList = () => {
         try {
             if (isEditMode) {
                 await axios.put(`${API_URL}/projects/${currentProjectId}`, payload);
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Project updated successfully'
+                });
             } else {
                 await axios.post(`${API_URL}/projects`, payload);
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Project created successfully'
+                });
             }
             setIsModalOpen(false);
             resetForm();
             fetchProjects();
         } catch (error) {
             console.error('Error saving project:', error);
-            alert('Failed to save project');
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed to save project'
+            });
         }
     };
 
@@ -251,12 +282,31 @@ const ProjectList = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this project?')) return;
-        try {
-            await axios.delete(`${API_URL}/projects/${id}`);
-            fetchProjects();
-        } catch (error) {
-            console.error('Error deleting project:', error);
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${API_URL}/projects/${id}`);
+                fetchProjects();
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Project deleted'
+                });
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to delete project'
+                });
+            }
         }
     };
 
