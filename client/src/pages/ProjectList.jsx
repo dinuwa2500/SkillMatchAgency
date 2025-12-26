@@ -28,19 +28,17 @@ const ProjectList = () => {
     // Bulk Project State
     const [selectedProjects, setSelectedProjects] = useState(new Set());
 
-    // Inline Editing State
-    const [editingProjectId, setEditingProjectId] = useState(null);
-    const [editFormData, setEditFormData] = useState({});
-
-    // Modal Form State (Create)
+    // Modal Form State (Create & Edit)
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [currentProjectId, setCurrentProjectId] = useState(null);
     const [formData, setFormData] = useState({
-        name: '', description: '', start_date: '', end_date: '', requirements: []
+        name: '', description: '', status: 'Planning', start_date: '', end_date: '', requirements: []
     });
     const [requirementsData, setRequirementsData] = useState([{ skill_id: '', min_proficiency_level: 'Intermediate' }]);
 
     // Match Modal State
     const [matches, setMatches] = useState([]);
-    const [currentProject, setCurrentProject] = useState(null);
+    const [matchProject, setMatchProject] = useState(null);
 
     const API_URL = 'http://localhost:5000/api';
 
@@ -129,37 +127,40 @@ const ProjectList = () => {
         }
     };
 
-    // Inline Edit Handlers
-    const startInlineEdit = (project) => {
-        setEditingProjectId(project.id);
-        // Format dates for input[type="date"] (YYYY-MM-DD)
+    // Form Handlers
+    const openCreateModal = () => {
+        setIsEditMode(false);
+        setCurrentProjectId(null);
+        resetForm();
+        setIsModalOpen(true);
+    };
+
+    const openEditModal = (project) => {
+        setIsEditMode(true);
+        setCurrentProjectId(project.id);
+
+        // Format dates for input[type="date"]
         const formatForInput = (dateStr) => dateStr ? new Date(dateStr).toISOString().split('T')[0] : '';
 
-        setEditFormData({
-            ...project,
+        setFormData({
+            name: project.name,
+            description: project.description || '',
+            status: project.status || 'Planning',
             start_date: formatForInput(project.start_date),
             end_date: formatForInput(project.end_date)
         });
-    };
 
-    const cancelInlineEdit = () => {
-        setEditingProjectId(null);
-        setEditFormData({});
-    };
-
-    const saveInlineEdit = async () => {
-        try {
-            await axios.put(`${API_URL}/projects/${editingProjectId}`, editFormData);
-            setEditingProjectId(null);
-            fetchProjects();
-        } catch (error) {
-            console.error('Update error:', error);
-            alert('Failed to update project');
+        // Map requirements
+        if (project.requirements && project.requirements.length > 0) {
+            setRequirementsData(project.requirements.map(r => ({
+                skill_id: r.skill_id,
+                min_proficiency_level: r.min_proficiency_level
+            })));
+        } else {
+            setRequirementsData([{ skill_id: '', min_proficiency_level: 'Intermediate' }]);
         }
-    };
 
-    const handleEditChange = (field, value) => {
-        setEditFormData(prev => ({ ...prev, [field]: value }));
+        setIsModalOpen(true);
     };
 
     const exportData = () => {
@@ -205,20 +206,26 @@ const ProjectList = () => {
         e.preventDefault();
         const payload = {
             ...formData,
-            requirements: requirementsData.filter(r => r.skill_id)
+            requirements: requirementsData.filter(r => r.skill_id) // Filter empty rows
         };
+
         try {
-            await axios.post(`${API_URL}/projects`, payload);
+            if (isEditMode) {
+                await axios.put(`${API_URL}/projects/${currentProjectId}`, payload);
+            } else {
+                await axios.post(`${API_URL}/projects`, payload);
+            }
             setIsModalOpen(false);
             resetForm();
             fetchProjects();
         } catch (error) {
             console.error('Error saving project:', error);
+            alert('Failed to save project');
         }
     };
 
     const resetForm = () => {
-        setFormData({ name: '', description: '', start_date: '', end_date: '', requirements: [] });
+        setFormData({ name: '', description: '', status: 'Planning', start_date: '', end_date: '', requirements: [] });
         setRequirementsData([{ skill_id: '', min_proficiency_level: 'Intermediate' }]);
     };
 
@@ -233,7 +240,7 @@ const ProjectList = () => {
     };
 
     const viewMatches = async (project) => {
-        setCurrentProject(project);
+        setMatchProject(project);
         try {
             const res = await axios.get(`${API_URL}/match/${project.id}`);
             setMatches(res.data);
@@ -265,7 +272,7 @@ const ProjectList = () => {
                     <Button onClick={exportData} variant="secondary" className="flex items-center gap-2">
                         <Download size={16} /> Export
                     </Button>
-                    <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+                    <Button onClick={openCreateModal} variant="primary" className="flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
                         <Plus size={18} /> New Project
                     </Button>
                 </div>
@@ -365,7 +372,6 @@ const ProjectList = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredProjects.map((project) => {
-                                const isEditing = editingProjectId === project.id;
                                 return (
                                     <tr key={project.id} className={`hover:bg-gray-50 transition-colors ${selectedProjects.has(project.id) ? 'bg-indigo-50 hover:bg-indigo-100' : ''}`}>
                                         <td className="px-6 py-4">
@@ -377,66 +383,29 @@ const ProjectList = () => {
                                             />
                                         </td>
 
-                                        {/* Name & Desc */}
                                         <td className="px-6 py-4">
-                                            {isEditing ? (
-                                                <div className="space-y-2">
-                                                    <input
-                                                        type="text"
-                                                        className="w-full px-2 py-1 border rounded text-sm"
-                                                        value={editFormData.name}
-                                                        onChange={(e) => handleEditChange('name', e.target.value)}
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        className="w-full px-2 py-1 border rounded text-xs text-gray-500"
-                                                        value={editFormData.description}
-                                                        onChange={(e) => handleEditChange('description', e.target.value)}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div>
-                                                    <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                                                    <div className="text-sm text-gray-500 truncate max-w-xs">{project.description}</div>
-                                                </div>
-                                            )}
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                                                <div className="text-sm text-gray-500 truncate max-w-xs">{project.description}</div>
+                                            </div>
                                         </td>
 
                                         {/* Status */}
                                         <td className="px-6 py-4">
-                                            {isEditing ? (
-                                                <select
-                                                    className="px-2 py-1 border rounded text-sm bg-white"
-                                                    value={editFormData.status}
-                                                    onChange={(e) => handleEditChange('status', e.target.value)}
-                                                >
-                                                    <option value="Planning">Planning</option>
-                                                    <option value="Active">Active</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
-                                            ) : (
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                     ${project.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                                        project.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                                                            'bg-gray-100 text-gray-800'}`}>
-                                                    {project.status}
-                                                </span>
-                                            )}
+                                                    project.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                                        'bg-gray-100 text-gray-800'}`}>
+                                                {project.status}
+                                            </span>
                                         </td>
 
                                         {/* Timeline */}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {isEditing ? (
-                                                <div className="flex flex-col gap-1">
-                                                    <input type="date" className="text-xs border rounded px-1" value={editFormData.start_date} onChange={(e) => handleEditChange('start_date', e.target.value)} />
-                                                    <input type="date" className="text-xs border rounded px-1" value={editFormData.end_date} onChange={(e) => handleEditChange('end_date', e.target.value)} />
-                                                </div>
-                                            ) : (
-                                                <div className="text-sm text-gray-500">
-                                                    <div>{new Date(project.start_date).toLocaleDateString()}</div>
-                                                    <div className="text-xs text-gray-400">to {new Date(project.end_date).toLocaleDateString()}</div>
-                                                </div>
-                                            )}
+                                            <div className="text-sm text-gray-500">
+                                                <div>{new Date(project.start_date).toLocaleDateString()}</div>
+                                                <div className="text-xs text-gray-400">to {new Date(project.end_date).toLocaleDateString()}</div>
+                                            </div>
                                         </td>
 
                                         {/* Requirements (Count) */}
@@ -455,18 +424,9 @@ const ProjectList = () => {
                                         {/* Actions */}
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-2">
-                                                {isEditing ? (
-                                                    <>
-                                                        <button onClick={saveInlineEdit} className="text-green-600 hover:text-green-900 p-1"><Save size={18} /></button>
-                                                        <button onClick={cancelInlineEdit} className="text-gray-400 hover:text-gray-600 p-1"><X size={18} /></button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <button onClick={() => viewMatches(project)} className="text-indigo-600 hover:text-indigo-900 p-1" title="Find Matches"><Users size={18} /></button>
-                                                        <button onClick={() => startInlineEdit(project)} className="text-gray-400 hover:text-gray-600 p-1" title="Edit"><Edit2 size={18} /></button>
-                                                        <button onClick={() => handleDelete(project.id)} className="text-red-400 hover:text-red-600 p-1" title="Delete"><Trash2 size={18} /></button>
-                                                    </>
-                                                )}
+                                                <button onClick={() => viewMatches(project)} className="text-indigo-600 hover:text-indigo-900 p-1" title="Find Matches"><Users size={18} /></button>
+                                                <button onClick={() => openEditModal(project)} className="text-gray-400 hover:text-gray-600 p-1" title="Edit"><Edit2 size={18} /></button>
+                                                <button onClick={() => handleDelete(project.id)} className="text-red-400 hover:text-red-600 p-1" title="Delete"><Trash2 size={18} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -477,13 +437,27 @@ const ProjectList = () => {
                 </div>
             </div>
 
-            {/* Create Project Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Project">
+            {/* Create/Edit Project Modal */}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditMode ? "Edit Project" : "Create New Project"}>
                 <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-y-auto pr-2">
                     <Input label="Project Name" id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
+
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-md" rows="2" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                        <textarea className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none" rows="3" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none bg-white"
+                            value={formData.status}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        >
+                            <option value="Planning">Planning</option>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                        </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <Input label="Start Date" id="start_date" type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
@@ -511,13 +485,13 @@ const ProjectList = () => {
 
                     <div className="flex justify-end gap-3 mt-6">
                         <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button type="submit">Create Project</Button>
+                        <Button type="submit">{isEditMode ? "Save Changes" : "Create Project"}</Button>
                     </div>
                 </form>
             </Modal>
 
             {/* Match Results Modal */}
-            <Modal isOpen={isMatchModalOpen} onClose={() => setIsMatchModalOpen(false)} title={`Matches for ${currentProject?.name}`}>
+            <Modal isOpen={isMatchModalOpen} onClose={() => setIsMatchModalOpen(false)} title={`Matches for ${matchProject?.name}`}>
                 {matches.length > 0 ? (
                     <div className="space-y-4">
                         {matches.map((match, idx) => (
