@@ -1,104 +1,83 @@
 # SkillMatch Agency
 
-A full-stack web application for managing personnel skills, projects, and finding the perfect match for project requirements. Now featuring advanced resource scheduling and a modern, responsive UI.
+A full-stack web application for managing personnel skills, projects, and finding the perfect match for project requirements. Now featuring **Advanced Resource Scheduling** and a **Mobile-First Responsive UI**.
 
-## 🚀 Features
+## 🐳 Quick Start (Docker)
+
+The easiest way to run the application is using Docker.
+
+```bash
+# 1. Start everything
+docker-compose up --build -d
+
+# 2. Open in Browser
+# Frontend: http://localhost
+# Backend:  http://localhost:5000
+```
+*   **Credentials**: Database password matches the container auto-config.
+*   **Stop**: Run `docker-compose down`.
+
+---
+
+## 🚀 Key Features
+
+### 📱 Mobile-First Experience **(New!)**
+- **Seamless Responsiveness**: Optimized for Phones, Tablets, and Desktops.
+- **Adaptive Layouts**:
+    - **Dashboard**: Auto-switching from 2-column stats (Mobile) to 4-column (Desktop).
+    - **Tables**: Smartly convert to **Card Views** or **Compact Lists** on small screens.
+    - **Navigation**: Touch-friendly Hamburger menu for mobile navigation.
+
+### 📅 Resource Scheduling
+- **Gantt Chart**: Visual timeline to assign personnel to projects.
+- **Smart Assignment**: Drag-and-drop support with real-time updates.
 
 ### Core Management
-- **Personnel Management**: Add, edit, delete personnel with skills and proficiency levels.
-- **Skill Catalog**: Manage a database of technical and soft skills.
-- **Projects**: Create projects with specific start/end dates and status.
+- **Personnel**: Manage staff with skills and seniority levels.
+- **Projects**: Track project timelines and status.
+- **Skills**: Maintain a catalog of technical and soft skills.
 
-### 📅 Resource Scheduling (New!)
-- **Gantt Chart Scheduler**: Visual timeline to assign personnel to projects.
-- **Drag-and-Drop**: Easy visualization of who is working on what and when.
-- **Conflict Prevention**: (Roadmap) Future support for overlapping detection.
+### 🎨 Premium UI/UX
+- **Modern Design**: Clean interface with "Inter" typography and Tailwind styling.
+- **Smart Notifications**: Non-intrusive Toasts for all actions.
+- **Safe Deletes**: SweetAlert2 confirmations to prevent accidents.
 
-### 🎨 Enhanced UI/UX (New!)
-- **Modal-Based Editing**: Clean, form-based editing for all entities.
-- **Toast Notifications**: Non-intrusive, real-time feedback for all actions using `SweetAlert2`.
-- **Delete Confirmations**: Custom styled alerts to prevent accidental deletions.
-- **Responsive Design**: Works on varying screen sizes using Tailwind CSS.
-
-### Intelligent Matching
-- **Matchmaking Algorithm**: Automatically suggests personnel who meet 100% of a project's skill requirements.
-- **Proficiency Filtering**: Ensures candidates meet or exceed the required proficiency (e.g., Senior > Junior).
-
-### 📊 Strategic Analytics
-- **Dashboard**: Real-time insights into resource counters.
-- **Visualizations**: Bar charts for top skills and experience tracking.
+### 🧩 Intelligent Matching
+- **Algorithm**: `server/controllers/matchingController.js`
+- **Logic**: Suggests candidates who matching **100% of skills** at the **required proficiency**.
 
 ## 🛠 Technology Stack
 
-- **Frontend**: React.js 18, Vite, Tailwind CSS
-- **Libraries**: `gantt-task-react`, `sweetalert2`, `recharts`, `lucide-react`, `axios`
+- **Infrastructure**: Docker, Docker Compose, Nginx
+- **Frontend**: React 19, Vite, Tailwind CSS 4
 - **Backend**: Node.js, Express.js
-- **Database**: MySQL (using `mysql2` pool)
-- **Tooling**: pnpm
+- **Database**: MySQL 8.0
+- **Libraries**: `gantt-task-react`, `sweetalert2`, `recharts`, `lucide-react`
 
-## 📋 Prerequisites
+## ⚙️ Manual Setup (Dev Mode)
 
-- **Node.js**: v18 or higher
-- **MySQL**: v8.0 or higher
-- **pnpm**: `npm install -g pnpm`
+If you prefer running without Docker:
 
-## ⚙️ How to Run
-
-### 1. Clone the Repository
+### 1. Database
+Ensure MySQL is running on `localhost:3306` and credentials match `server/.env`.
 ```bash
-git clone <repository-url>
-cd SkillMatchAgency
+cd server
+pnpm install
+node scripts/initDb.js
+node scripts/createAssignmentsTable.js
 ```
 
-### 2. Database Setup
-1.  Ensure MySQL is running on `localhost:3306`.
-2.  Create the database and tables:
-    ```bash
-    cd server
-    pnpm install
-    
-    # Initialize Core Schema
-    node scripts/initDb.js
-    
-    # Initialize Assignments Table (New Feature)
-    node scripts/createAssignmentsTable.js
-    ```
-3.  **Environment Variables**: Update `server/.env` if your MySQL user/password differs from `root`/`` (empty).
-
-### 3. Start Backend Server
+### 2. Backend
 ```bash
-# In /server directory
+cd server
 pnpm start
-# Server runs on http://localhost:5000
+# Runs on http://localhost:5000
 ```
 
-### 4. Start Frontend Client
+### 3. Frontend
 ```bash
-# Open a new terminal
 cd client
 pnpm install
 pnpm dev
-# Client runs on http://localhost:5173
+# Runs on http://localhost:5173
 ```
-
-## 🧪 API Endpoints
-
-### Personnel & Skills
-- `GET /api/personnel`: List all personnel
-- `POST /api/personnel`: Create new personnel
-- `GET /api/skills`: List all skills
-
-### Projects & Assignments
-- `GET /api/projects`: List all projects
-- `GET /api/assignments`: **(New)** Get all resource assignments for the Gantt chart
-- `POST /api/assignments`: **(New)** Create a new assignment
-
-### Matching & Analytics
-- `GET /api/match/:projectId`: Find matches for a project
-- `GET /api/analytics`: Get dashboard statistics
-
-## 🧩 Matching Algorithm Logic
-The matching algorithm (`server/controllers/matchingController.js`) is explicit and rules-based:
-1.  **Requirement Check**: Iterates through every candidate.
-2.  **Hard Constraint**: Candidate must possess *every single skill* listed in the project requirements.
-3.  **Proficiency Threshold**: For each required skill, the candidate's level (Beginner=1 -> Expert=4) must be greater than or equal to the project's minimum requirement.
