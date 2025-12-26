@@ -49,3 +49,16 @@ CREATE TABLE IF NOT EXISTS project_requirements (
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
 );
+
+-- Project Assignments Table (Resource Scheduling)
+CREATE TABLE IF NOT EXISTS project_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT,
+    person_id INT,
+    start_date DATE,
+    end_date DATE,
+    role VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+    FOREIGN KEY (person_id) REFERENCES personnel(id) ON DELETE CASCADE
+);

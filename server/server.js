@@ -14,16 +14,19 @@ app.get('/', (req, res) => {
     res.send('SkillMatch Agency API is running');
 });
 
-app.use('/api/personnel', require('./routes/personnelRoutes'));
-app.use('/api/skills', require('./routes/skillsRoutes'));
-app.use('/api/projects', require('./routes/projectsRoutes'));
-app.use('/api/match', require('./routes/matchingRoutes'));
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
+const personnelRoutes = require('./routes/personnelRoutes');
+const skillsRoutes = require('./routes/skillsRoutes');
+const projectsRoutes = require('./routes/projectsRoutes');
+const matchingRoutes = require('./routes/matchingRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const assignmentsRoutes = require('./routes/assignmentsRoutes');
 
-
-
-
-
+app.use('/api/personnel', personnelRoutes);
+app.use('/api/skills', skillsRoutes);
+app.use('/api/projects', projectsRoutes);
+app.use('/api/match', matchingRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/assignments', assignmentsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

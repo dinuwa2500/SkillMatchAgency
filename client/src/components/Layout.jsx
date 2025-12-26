@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 
 const Navbar = () => {
     const location = useLocation();
@@ -17,6 +17,7 @@ const Navbar = () => {
                                 <Link to="/personnel" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/personnel')}`}>Personnel</Link>
                                 <Link to="/skills" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/skills')}`}>Skills</Link>
                                 <Link to="/projects" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/projects')}`}>Projects</Link>
+                                <Link to="/schedule" className={`px-3 py-2 rounded-md text-sm font-medium ${isActive('/schedule')}`}>Schedule</Link>
                             </div>
                         </div>
                     </div>
@@ -26,12 +27,12 @@ const Navbar = () => {
     );
 };
 
-const Layout = ({ children }) => {
+const Layout = () => {
     return (
         <div className="min-h-screen bg-gray-100">
             <Navbar />
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                {children}
+                <Outlet />
             </main>
         </div>
     );
