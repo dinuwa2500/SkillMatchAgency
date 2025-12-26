@@ -1,5 +1,5 @@
 # Use official Node.js lightweight image
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Enable pnpm via corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
