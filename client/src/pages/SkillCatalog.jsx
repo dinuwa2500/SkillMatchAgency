@@ -204,16 +204,16 @@ const SkillCatalog = () => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Skill Catalog</h1>
-                <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Skill Catalog</h1>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     {selectedSkills.size > 0 && (
-                        <Button onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2">
+                        <Button onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto">
                             <Trash size={18} />
-                            Delete Selected ({selectedSkills.size})
+                            Delete ({selectedSkills.size})
                         </Button>
                     )}
-                    <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center gap-2">
+                    <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center justify-center gap-2 w-full sm:w-auto">
                         <Plus size={18} />
                         Add Skill
                     </Button>
@@ -239,13 +239,13 @@ const SkillCatalog = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative w-full">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search size={18} className="text-gray-400" />
                         </div>
                         <input
                             type="text"
-                            placeholder="Search by skill name or description..."
+                            placeholder="Search skills..."
                             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition-all text-sm outline-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -271,12 +271,14 @@ const SkillCatalog = () => {
                 </div>
             </div>
 
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            {/* Desktop View: Table */}
+            <div className="hidden md:block bg-white shadow overflow-hidden sm:rounded-md">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
+                        {/* ... Table Header ... */}
                         <thead className="bg-gray-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3 text-left">
+                                <th scope="col" className="px-6 py-3 text-left w-10">
                                     <input
                                         type="checkbox"
                                         className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -313,7 +315,7 @@ const SkillCatalog = () => {
                                         )}
                                     </div>
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Personnel</th>
+                                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                                 <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                             </tr>
@@ -336,7 +338,7 @@ const SkillCatalog = () => {
                                             {skill.personnel_count}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">{skill.description}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{skill.description}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button onClick={() => openEditModal(skill)} className="text-indigo-600 hover:text-indigo-900 mr-4">
                                             <Edit size={18} />
@@ -350,6 +352,49 @@ const SkillCatalog = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile View: Cards */}
+            <div className="md:hidden space-y-4">
+                {currentItems.map((skill) => (
+                    <div
+                        key={skill.id}
+                        className={`bg-white p-4 rounded-xl shadow-sm border border-gray-200 ${selectedSkills.has(skill.id) ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''}`}
+                    >
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={selectedSkills.has(skill.id)}
+                                    onChange={() => toggleSelectSkill(skill.id)}
+                                />
+                                <div>
+                                    <h3 className="font-semibold text-gray-900">{skill.name}</h3>
+                                    <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                        {skill.category || 'Uncategorized'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={() => openEditModal(skill)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full">
+                                    <Edit size={18} />
+                                </button>
+                                <button onClick={() => handleDelete(skill.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-full">
+                                    <Trash size={18} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {skill.description && (
+                            <p className="text-sm text-gray-600 mt-2 line-clamp-2">{skill.description}</p>
+                        )}
+
+                        <div className="mt-3 flex items-center justify-between text-xs text-gray-500 border-t pt-2">
+                            <span>Assigned: <strong className="text-gray-800">{skill.personnel_count}</strong></span>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             <Modal

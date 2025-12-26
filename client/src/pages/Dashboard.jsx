@@ -76,16 +76,16 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-gray-800 mb-8">Strategic Overview</h1>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatsCard title="Total Personnel" value={analytics.counts.personnel} icon={<Users className="text-blue-500" />} color="bg-blue-50" />
-                <StatsCard title="Total Skills" value={analytics.counts.skills} icon={<Book className="text-purple-500" />} color="bg-purple-50" />
-                <StatsCard title="Total Projects" value={analytics.counts.projects} icon={<Briefcase className="text-orange-500" />} color="bg-orange-50" />
-                <StatsCard title="Active Projects" value={analytics.counts.activeProjects} icon={<Activity className="text-green-500" />} color="bg-green-50" />
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8">
+                <StatsCard title="Total Personnel" value={analytics.counts.personnel} icon={<Users className="text-blue-500 w-5 h-5 md:w-6 md:h-6" />} color="bg-blue-50" />
+                <StatsCard title="Total Skills" value={analytics.counts.skills} icon={<Book className="text-purple-500 w-5 h-5 md:w-6 md:h-6" />} color="bg-purple-50" />
+                <StatsCard title="Total Projects" value={analytics.counts.projects} icon={<Briefcase className="text-orange-500 w-5 h-5 md:w-6 md:h-6" />} color="bg-orange-50" />
+                <StatsCard title="Active Projects" value={analytics.counts.activeProjects} icon={<Activity className="text-green-500 w-5 h-5 md:w-6 md:h-6" />} color="bg-green-50" />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 {/* Top Skills Chart */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                         <h2 className="text-xl font-semibold text-gray-800">Top Available Skills</h2>
                         <select
@@ -119,7 +119,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Experience Distribution */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-100">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                         <h2 className="text-xl font-semibold text-gray-800">Experience Distribution</h2>
                         <select
@@ -178,10 +178,10 @@ const Dashboard = () => {
 
 
             {/* Quick Matching Preview Widget */}
-            <div className="grid grid-cols-1 gap-8 mb-8 mt-8">
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
-                        <h2 className="text-xl font-semibold text-gray-800">Quick Matching Preview</h2>
+            <div className="grid grid-cols-1 gap-4 sm:gap-8 mb-8 mt-6 sm:mt-8">
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-100">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Quick Matching Preview</h2>
                         <select
                             className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto"
                             value={selectedProjectId}
@@ -197,26 +197,26 @@ const Dashboard = () => {
                     {selectedProjectId ? (
                         previewMatches.length > 0 ? (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left">
+                                <table className="w-full text-left text-sm sm:text-base">
                                     <thead>
                                         <tr className="border-b border-gray-200 text-sm text-gray-500 uppercase">
-                                            <th className="py-2">Candidate</th>
-                                            <th className="py-2">Role</th>
-                                            <th className="py-2 text-center">Match %</th>
-                                            <th className="py-2 text-center">Skills</th>
+                                            <th className="py-2 px-4">Candidate</th>
+                                            <th className="py-2 px-4">Role</th>
+                                            <th className="py-2 px-4 text-center">Match %</th>
+                                            <th className="py-2 px-4 text-center">Skills</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {previewMatches.map((match, idx) => (
                                             <tr key={idx} className="hover:bg-gray-50">
-                                                <td className="py-3 font-medium text-gray-900">{match.name}</td>
-                                                <td className="py-3 text-gray-600">{match.role}</td>
-                                                <td className="py-3 text-center">
+                                                <td className="py-3 px-4 font-medium text-gray-900">{match.name}</td>
+                                                <td className="py-3 px-4 text-gray-600">{match.role}</td>
+                                                <td className="py-3 px-4 text-center">
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         100%
                                                     </span>
                                                 </td>
-                                                <td className="py-3 text-center">
+                                                <td className="py-3 px-4 text-center">
                                                     <div className="flex flex-wrap justify-center gap-1">
                                                         {match.message ? (
                                                             <span className="text-xs text-gray-500">{match.message}</span>
@@ -258,24 +258,49 @@ const Dashboard = () => {
 };
 
 const TopPersonnelTable = ({ data }) => (
-    <div className="mt-8 bg-white p-6 rounded-lg shadow-md border border-gray-100">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Top Personnel</h2>
-        <div className="overflow-x-auto">
+    <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-lg shadow-md border border-gray-100">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">Top Personnel</h2>
+
+        {/* Mobile View: Compact List */}
+        <div className="block sm:hidden space-y-3">
+            {data.map(person => (
+                <div key={person.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex justify-between items-center">
+                    <div>
+                        <div className="font-semibold text-gray-900 text-sm">{person.name}</div>
+                        <div className="text-xs text-gray-500">{person.role}</div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs font-medium bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                            {person.total_skills} Skills
+                        </span>
+                        <span className="text-xs text-gray-500">
+                            {person.active_projects} Projects
+                        </span>
+                    </div>
+                </div>
+            ))}
+            {(!data || data.length === 0) && (
+                <div className="text-center text-gray-400 text-sm py-4 italic">No personnel data available</div>
+            )}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left">
                 <thead>
                     <tr className="border-b border-gray-200 text-sm text-gray-500 uppercase">
-                        <th className="py-2">Name</th>
-                        <th className="py-2">Role</th>
-                        <th className="py-2 text-center">Total Skills</th>
-                        <th className="py-2 text-center">Active Projects</th>
+                        <th className="py-2 px-4">Name</th>
+                        <th className="py-2 px-4">Role</th>
+                        <th className="py-2 px-4 text-center">Total Skills</th>
+                        <th className="py-2 px-4 text-center">Active Projects</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                     {data.map(person => (
                         <tr key={person.id} className="hover:bg-gray-50 group cursor-default">
-                            <td className="py-3 font-medium text-gray-900">{person.name}</td>
-                            <td className="py-3 text-gray-600">{person.role}</td>
-                            <td className="py-3 text-center relative">
+                            <td className="py-3 px-4 font-medium text-gray-900">{person.name}</td>
+                            <td className="py-3 px-4 text-gray-600">{person.role}</td>
+                            <td className="py-3 px-4 text-center relative">
                                 <span className="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
                                     {person.total_skills}
                                 </span>
@@ -286,7 +311,7 @@ const TopPersonnelTable = ({ data }) => (
                                     </div>
                                 )}
                             </td>
-                            <td className="py-3 text-center text-gray-600">{person.active_projects}</td>
+                            <td className="py-3 px-4 text-center text-gray-600">{person.active_projects}</td>
                         </tr>
                     ))}
                     {(!data || data.length === 0) && (
@@ -301,13 +326,13 @@ const TopPersonnelTable = ({ data }) => (
 );
 
 const StatsCard = ({ title, value, icon, color }) => (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 flex items-center">
-        <div className={`p-3 rounded-full mr-4 ${color}`}>
+    <div className="bg-white rounded-lg shadow-sm p-3 md:p-6 border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+        <div className={`p-2 md:p-3 rounded-full ${color}`}>
             {icon}
         </div>
         <div>
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-xs md:text-sm font-medium text-gray-500">{title}</p>
+            <p className="text-lg md:text-2xl font-bold text-gray-900">{value}</p>
         </div>
     </div>
 );

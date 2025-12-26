@@ -232,8 +232,8 @@ const ResourceScheduler = () => {
                                 <div className="flex items-center gap-3 w-full overflow-hidden">
                                     {/* Avatar */}
                                     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-1 ring-black/5 shadow-sm transition-colors ${isCompleted
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : 'bg-white text-gray-700 border border-gray-200'
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-white text-gray-700 border border-gray-200'
                                         }`}>
                                         {isCompleted ? '✓' : initials}
                                     </div>
@@ -246,8 +246,8 @@ const ResourceScheduler = () => {
                                             </span>
                                             {/* Status Badge */}
                                             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wide border ${isCompleted
-                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                    : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
                                                 }`}>
                                                 {t.data?.status || 'Active'}
                                             </span>
@@ -299,11 +299,11 @@ const ResourceScheduler = () => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Resource Scheduler</h1>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                     <select
-                        className="border rounded-md px-2 py-1 text-sm bg-white"
+                        className="border rounded-md px-2 py-1 text-sm bg-white w-full sm:w-auto"
                         value={viewMode}
                         onChange={(e) => setViewMode(e.target.value)}
                     >
@@ -311,7 +311,7 @@ const ResourceScheduler = () => {
                         <option value={ViewMode.Week}>Week</option>
                         <option value={ViewMode.Month}>Month</option>
                     </select>
-                    <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center gap-2">
+                    <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center justify-center gap-2 w-full sm:w-auto">
                         <Plus size={18} />
                         Add Assignment
                     </Button>
@@ -319,52 +319,53 @@ const ResourceScheduler = () => {
             </div>
 
             {selectedTask && (
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-indigo-100 mb-4 flex justify-between items-center animate-pulse-once bg-gradient-to-r from-indigo-50 to-white">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-indigo-100 mb-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-pulse-once bg-gradient-to-r from-indigo-50 to-white">
                     <div className="flex items-center gap-4">
-                        <div className={`w-3 h-3 rounded-full ${selectedTask.data.status === 'Completed' ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
-                        <div>
-                            <p className="font-semibold text-gray-800">{selectedTask.name}</p>
+                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${selectedTask.data.status === 'Completed' ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
+                        <div className="min-w-0">
+                            <p className="font-semibold text-gray-800 truncate">{selectedTask.name}</p>
                             <p className="text-xs text-gray-500">
                                 {new Date(selectedTask.start).toLocaleDateString()} - {new Date(selectedTask.end).toLocaleDateString()}
                             </p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full md:w-auto">
                         <Button
                             onClick={handleToggleStatus}
-                            className={`${selectedTask.data.status === 'Completed' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'} text-white border-none`}
+                            className={`flex-1 md:flex-none ${selectedTask.data.status === 'Completed' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-600 hover:bg-green-700'} text-white border-none`}
                         >
                             {selectedTask.data.status === 'Completed' ? 'Mark Active' : 'Mark Completed'}
                         </Button>
-                        <Button onClick={() => handleDblClick(selectedTask)} variant="secondary">Edit</Button>
-                        <Button onClick={() => handleDelete(selectedTask)} className="bg-red-100 text-red-600 hover:bg-red-200 border-red-200">Delete</Button>
+                        <Button onClick={() => handleDblClick(selectedTask)} variant="secondary" className="flex-1 md:flex-none">Edit</Button>
+                        <Button onClick={() => handleDelete(selectedTask)} className="bg-red-100 text-red-600 hover:bg-red-200 border-red-200 flex-1 md:flex-none">Delete</Button>
                     </div>
                 </div>
             )}
 
-            {/* Removed brittle CSS styles in favor of CustomTaskList */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                {tasks.length > 0 ? (
-                    <Gantt
-                        tasks={tasks}
-                        viewMode={viewMode}
-                        onDateChange={handleTaskChange}
-                        onDelete={handleDelete}
-                        onDoubleClick={handleDblClick}
-                        onClick={handleSelect}
-                        onClick={handleSelect}
-                        TaskListTable={CustomTaskList}
-                        TaskListHeader={CustomTaskHeader}
-                        listCellWidth="350px" // Wider to fit the richer data grid
-                        columnWidth={viewMode === ViewMode.Month ? 300 : 65}
-                        barFill={60}
-                    />
-                ) : (
-                    <div className="text-center py-10 text-gray-500">
-                        <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                        <p>No assignments yet. Click "Add Assignment" to schedule resources.</p>
-                    </div>
-                )}
+            {/* Gantt Container with horizontal scroll for mobile */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
+                <div className="min-w-[800px]"> {/* Ensure min-width to trigger scroll on mobile if needed */}
+                    {tasks.length > 0 ? (
+                        <Gantt
+                            tasks={tasks}
+                            viewMode={viewMode}
+                            onDateChange={handleTaskChange}
+                            onDelete={handleDelete}
+                            onDoubleClick={handleDblClick}
+                            onClick={handleSelect}
+                            TaskListTable={CustomTaskList}
+                            TaskListHeader={CustomTaskHeader}
+                            listCellWidth="350px" // Wider to fit the richer data grid
+                            columnWidth={viewMode === ViewMode.Month ? 300 : 65}
+                            barFill={60}
+                        />
+                    ) : (
+                        <div className="text-center py-10 text-gray-500">
+                            <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+                            <p>No assignments yet. Click "Add Assignment" to schedule resources.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <Modal

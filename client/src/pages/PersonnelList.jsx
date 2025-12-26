@@ -131,9 +131,13 @@ const PersonnelList = () => {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Personnel Management</h1>
-                <Button onClick={() => { resetForm(); setIsModalOpen(true); }} variant="primary" className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Personnel Management</h1>
+                <Button
+                    onClick={() => { resetForm(); setIsModalOpen(true); }}
+                    variant="primary"
+                    className="flex items-center justify-center gap-2 w-full sm:w-auto shadow-md hover:shadow-lg transition-all"
+                >
                     <Plus size={18} />
                     Add Personnel
                 </Button>
@@ -230,46 +234,51 @@ const PersonnelList = () => {
 
                     return matchesSearch && matchesRole && matchesExp && matchesSkill;
                 }).map((person) => (
-                    <div key={person.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                        <div className="flex justify-between items-start mb-4">
+                    <div key={person.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-4 sm:p-6 border border-gray-100 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
                             <div>
-                                <h3 className="text-xl font-semibold text-gray-900">{person.name}</h3>
-                                <p className="text-sm text-gray-500">{person.role}</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">{person.name}</h3>
+                                <p className="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">{person.role}</p>
                             </div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold 
-                ${person.experience_level === 'Senior' ? 'bg-purple-100 text-purple-800' :
-                                    person.experience_level === 'Mid-Level' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                            <span className={`px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wide
+                ${person.experience_level === 'Senior' ? 'bg-purple-100 text-purple-700' :
+                                    person.experience_level === 'Mid-Level' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
                                 {person.experience_level}
                             </span>
                         </div>
 
-                        <p className="text-gray-600 text-sm mb-4">{person.email}</p>
+                        <div className="mb-3 sm:mb-4 flex-grow">
+                            <p className="text-gray-600 text-xs sm:text-sm mb-3 break-all">{person.email}</p>
 
-                        <div className="mb-4">
-                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Skills</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {person.skills && person.skills.length > 0 && person.skills[0].skill_id ? (
-                                    person.skills.map((skill, idx) => (
-                                        <span key={idx} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                                            {skill.skill_name} ({skill.level})
-                                        </span>
-                                    ))
-                                ) : (
-                                    <span className="text-xs text-gray-400 italic">No skills assigned</span>
-                                )}
+                            <div>
+                                <h4 className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Skills</h4>
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                                    {person.skills && person.skills.length > 0 && person.skills[0].skill_id ? (
+                                        person.skills.map((skill, idx) => (
+                                            <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                                                {skill.skill_name} <span className="ml-1 text-gray-400">({skill.level?.substring(0, 3)})</span>
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-xs text-gray-400 italic">No skills assigned</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
-                            <button onClick={() => openSkillModal(person)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full" title="Assign Skill">
-                                <Award size={18} />
-                            </button>
-                            <button onClick={() => openEditModal(person)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full" title="Edit">
-                                <Edit size={18} />
-                            </button>
-                            <button onClick={() => handleDelete(person.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-full" title="Delete">
-                                <Trash size={18} />
-                            </button>
+                        <div className="flex justify-between items-center mt-auto pt-3 sm:pt-4 border-t border-gray-100">
+                            <div className="text-xs text-gray-400 font-medium">Actions</div>
+                            <div className="flex gap-1 sm:gap-2">
+                                <button onClick={() => openSkillModal(person)} className="p-1.5 sm:p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Assign Skill">
+                                    <Award size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                                </button>
+                                <button onClick={() => openEditModal(person)} className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                    <Edit size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                                </button>
+                                <button onClick={() => handleDelete(person.id)} className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                    <Trash size={18} className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}

@@ -357,26 +357,36 @@ const ProjectList = () => {
             {/* Header & Stats */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Projects</h1>
-                    <p className="text-gray-500 mt-1">Manage, track, and assign personnel to your active projects.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Projects</h1>
+                    <p className="text-gray-500 mt-1 text-sm md:text-base">Manage, track, and assign personnel.</p>
                 </div>
-                <div className="flex gap-3">
-                    <Button onClick={exportData} variant="secondary" className="flex items-center gap-2">
-                        <Download size={16} /> Export
+                <div className="flex w-full md:w-auto gap-3">
+                    <Button
+                        onClick={exportData}
+                        variant="secondary"
+                        className="flex-1 md:flex-none justify-center items-center gap-2 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all duration-200 rounded-lg"
+                    >
+                        <Download size={18} className="text-gray-500" />
+                        <span>Export</span>
                     </Button>
-                    <Button onClick={openCreateModal} variant="primary" className="flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
-                        <Plus size={18} /> New Project
+                    <Button
+                        onClick={openCreateModal}
+                        variant="primary"
+                        className="flex-1 md:flex-none justify-center items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md hover:shadow-lg shadow-indigo-500/20 border-0 transition-all duration-200 transform hover:-translate-y-0.5 rounded-lg font-semibold"
+                    >
+                        <Plus size={18} />
+                        <span>New Project</span>
                     </Button>
                 </div>
             </div>
 
             {/* Utilization Chart */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-700">Project Requirements Overview</h3>
-                    <span className="text-xs text-gray-400">Top 8 Projects by Needs</span>
+                    <h3 className="text-lg font-semibold text-gray-700">Project Requirements</h3>
+                    <span className="text-xs text-gray-400">Top 8</span>
                 </div>
-                <div className="h-72 w-full">
+                <div className="h-64 md:h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
@@ -403,7 +413,7 @@ const ProjectList = () => {
 
             {/* Controls Bar */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div className="flex flex-1 gap-4 w-full">
+                <div className="flex flex-col md:flex-row gap-4 w-full">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                         <input
@@ -414,7 +424,7 @@ const ProjectList = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="w-48">
+                    <div className="w-full md:w-48">
                         <div className="relative">
                             <Filter className="absolute left-3 top-2.5 text-gray-400" size={18} />
                             <select
@@ -442,8 +452,8 @@ const ProjectList = () => {
                 )}
             </div>
 
-            {/* Projects Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Desktop Projects Table */}
+            <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -538,6 +548,57 @@ const ProjectList = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Projects Card View */}
+            <div className="md:hidden space-y-4">
+                {filteredProjects.map((project) => (
+                    <div key={project.id} className={`bg-white p-4 rounded-xl shadow-sm border border-gray-200 ${selectedProjects.has(project.id) ? 'ring-2 ring-indigo-500 bg-indigo-50' : ''}`}>
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={selectedProjects.has(project.id)}
+                                    onChange={() => toggleSelectProject(project.id)}
+                                />
+                                <div>
+                                    <div className="font-semibold text-gray-900">{project.name}</div>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1
+                                            ${project.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                            project.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                                'bg-gray-100 text-gray-800'}`}>
+                                        {project.status}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex gap-1">
+                                <button onClick={() => viewMatches(project)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full"><Users size={18} /></button>
+                                <button onClick={() => openEditModal(project)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"><Edit2 size={18} /></button>
+                                <button onClick={() => handleDelete(project.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
+                            </div>
+                        </div>
+
+                        {project.description && (
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
+                        )}
+
+                        <div className="flex justify-between items-center text-xs text-gray-500 border-t pt-3">
+                            <div>
+                                <span className="block font-medium text-gray-700">Timeline</span>
+                                {new Date(project.start_date).toLocaleDateString()} - {new Date(project.end_date).toLocaleDateString()}
+                            </div>
+                            <div className="text-right">
+                                <span className="block font-medium text-gray-700">Needs</span>
+                                {project.requirements && project.requirements.length > 0 && project.requirements[0].skill_id ? (
+                                    <span className="text-indigo-600 font-semibold">{project.requirements.length} Skills</span>
+                                ) : (
+                                    <span>None</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {/* Create/Edit Project Modal */}
