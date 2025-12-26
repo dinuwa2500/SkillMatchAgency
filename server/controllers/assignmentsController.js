@@ -8,7 +8,7 @@ exports.getAssignments = async (req, res) => {
             SELECT pa.id,
                    pa.project_id, p.name as project_name,
                    pa.person_id, per.name as person_name,
-                   pa.start_date, pa.end_date, pa.role
+                   pa.start_date, pa.end_date, pa.role, pa.status
             FROM project_assignments pa
             JOIN projects p ON pa.project_id = p.id
             JOIN personnel per ON pa.person_id = per.id
@@ -38,6 +38,25 @@ exports.createAssignment = async (req, res) => {
         const [result] = await db.execute(query, [project_id, person_id, start_date, end_date, role]);
 
         res.status(201).json({ id: result.insertId, message: 'Assignment created successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
+// Update Assignment
+exports.updateAssignment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { start_date, end_date, role, status } = req.body;
+
+        const query = `
+            UPDATE project_assignments 
+            SET start_date = ?, end_date = ?, role = ?, status = ?
+            WHERE id = ?
+        `;
+        await db.execute(query, [start_date, end_date, role, status, id]);
+        res.json({ message: 'Assignment updated successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error', error: error.message });
