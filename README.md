@@ -19,6 +19,17 @@ docker-compose up --build -d
 
 ---
 
+## 🤖 Continuous Integration (CI/CD)
+
+This project uses **GitHub Actions** to automate quality checks.
+
+*   **Workflow**: `.github/workflows/ci.yml`
+*   **Action**: Automatically runs `docker-compose build` on every push to `main` or Pull Request.
+*   **Benefit**: Ensures that every code change is compile-safe and Docker-ready before merging.
+*   **Status**: [![CI - Build and Test](https://github.com/dinuwa2500/SkillMatchAgency/actions/workflows/ci.yml/badge.svg)](https://github.com/dinuwa2500/SkillMatchAgency/actions/workflows/ci.yml)
+
+---
+
 ## 🚀 Key Features
 
 ### 📱 Mobile-First Experience **(New!)**
