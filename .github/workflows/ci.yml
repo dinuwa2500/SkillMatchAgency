@@ -17,6 +17,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create dummy .env file
+        run: |
+          touch ./server/.env
+          echo "DB_PASSWORD=placeholder" >> ./server/.env
+
       - name: Verify Docker Compose Config
         run: docker compose config
 
